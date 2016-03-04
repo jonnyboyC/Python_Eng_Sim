@@ -8,13 +8,13 @@ class SparkPlug:
     the spark by a small region of temperature change
     """
 
-    def __init__(self, pos, radius, temp, cycle, theta):
+    def __init__(self, pos, radius: float, temp: float, cycle: int, theta: float):
 
         # Initialize instance variables
         self.pos = np.array(pos)
         self.radius = float(radius)
         self.temp = float(temp)
-        self.cycle = cycle
+        self.cycle = int(cycle)
         self.theta = theta
 
 

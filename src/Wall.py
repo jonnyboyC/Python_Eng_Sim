@@ -9,10 +9,11 @@ class Wall:
     passed as arguments.
     """
 
-    def __init__(self, vert, rest_temp, conduct, cp, rho, d, area):
+    def __init__(self, vert: list, rest_temp: float, conduct: float,
+                 cp: float, rho: float, d: float, area: float):
 
         # Initialize instance variables
-        self.vert = vert
+        self.vert = np.array(vert)
         self.rest_temp = float(rest_temp)
         self.temp = float(rest_temp)
         self.conduct = float(conduct)
@@ -22,7 +23,7 @@ class Wall:
         self.rho = float(rho)
         self.norm = self.calc_norm()
 
-    def temp_change(self, q, t):
+    def temp_change(self, q: float, t: float):
 
         # Heat loss rate assuming constant specific heat
         dt_heat = -self.conduct*self.area*(self.temp-self.rest_temp)/self.d + q
@@ -44,7 +45,8 @@ class MovingWall(Wall):
     body dynamics. Here Velocity is tracked and degrees of freedom are explicitly specified.
     """
 
-    def __init__(self, vert, rest_temp, conduct, cp, rho, d, area, on_rails, tdof, rdof):
+    def __init__(self, vert, rest_temp: float, conduct: float, cp: float,
+                 rho: float, d: float, area: float, on_rails: bool, xdof: bool, ydof: bool, rdof: bool):
 
         # We're trying this inheritance thing
         Wall.__init__(self, vert, rest_temp, conduct, cp, rho, d, area)
@@ -55,7 +57,8 @@ class MovingWall(Wall):
         self.connections = []
         self.vel = np.array([0, 0])
         self.on_rails = on_rails
-        self.tdof = tdof
+        self.xdof = xdof
+        self.ydof = ydof
         self.rdof = rdof
 
     def calc_mass(self):
