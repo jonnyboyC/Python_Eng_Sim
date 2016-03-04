@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Wall:
 
     """
@@ -63,12 +64,14 @@ class MovingWall(Wall):
 
     def calc_mass(self):
         # Determine mass of the wall
+
         length = np.linalg.norm(self.vert[1, :] - self.vert[0, :])
         mass = self.rho*self.area*self.d*length
         return mass
 
     def cen_mass(self):
         # Determine the center of mass
+
         cen_mass = (self.vert[0, :] + self.vert[1, :])/2
         return cen_mass
 
