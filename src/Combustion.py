@@ -15,8 +15,9 @@ def valid_reaction(reactions: list, particles: list):
 
     # Determine if reactants form a real reaction
     for reaction in reactions:
-        if reactants == reaction.reaction_set():
-            particles = reaction.activation(particles):
+        if reactants >= reaction.reaction_set():
+            particles = reaction.activation(particles)
+            particles = collision(particles)
             return particles
 
     # If no reaction is present determine collision
