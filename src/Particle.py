@@ -26,6 +26,50 @@ class ChemReactions:
 
         return reactants
 
+    def activation(self, particles: list):
+        # Determine if the relative motion of the particles produce enough kinetic energy to active the reaction
+        sum_mass = sum(particles.mole.mass)
+        sum_momentum = np.array([0, 0])
+        for mass, vel in zip(particles.mole.mass, particles.vel):
+            sum_momentum += mass*vel
+
+        cen_vel = sum_momentum/sum_mass
+        v0 = particles[0].vel - cen_vel
+        v1 = particles[1].vel - cen_vel
+
+        kinetic_energy =  1/2*sum_mass*np.linalg.norm(sum_momentum)**2
+        kinetic_energy += 1/2*particles[0].molecule.mass*np.linalg.norm(v0)**2
+        kinetic_energy += 1/2*particles[1].molecule.mass*np.linalg.norm(v1)**2
+
+        if self.e > kinetic_energy:
+            return particles
+
+
+
+
+    def print(self):
+        # Debugging function to show if reaction was read in correctly
+        output = ""
+        for molecule, stoch in zip(self.react, self.stoch_r):
+            if stoch == 1:
+                output += molecule.symbol + " + "
+            else:
+                output += str(stoch) + molecule.symbol + " + "
+
+        # Remove trailing +
+        output = output[:-3]
+        output += " -> "
+
+        for molecule, stoch in zip(self.prod, self.stoch_p):
+            if stoch == 1:
+                output += molecule.symbol + " + "
+            else:
+                output += str(stoch) + molecule.symbol + " + "
+
+        # Remove trailing + and print
+        output = output[:-3]
+        print(output)
+
 
 class Molecule:
 
@@ -33,10 +77,11 @@ class Molecule:
     The molecule class, contains information on the elemental properties of a given molecule
     """
 
-    def __init__(self, symbol: str, mass: float, radius: float):
+    def __init__(self, symbol: str, mass: float, radius: float, inert: bool):
         self.symbol = symbol
         self.mass = float(mass)
         self.radius = float(radius)
+        self.inert = bool(inert)
 
 
 class Particle:
@@ -46,7 +91,7 @@ class Particle:
     """
 
     def __init__(self, molecule: Molecule, pos: list, vel: list):
-        self.molecule = molecule
+        self.mole = molecule
         self.pos = np.array(pos)
         self.vel = np.array(vel)
 
@@ -58,6 +103,12 @@ class Particle:
         # Currently a stub, not sure if I'll implement this
         pass
 
+    def aabb(self):
+        # Return Values for aspect adjusted bounding box.
+        radius = self.mole.radius
+        return np.array([self.pos[0] + radius, self.pos[1] + radius],
+                        [self.pos[0] - radius, self.pos[1] - radius])
+
 
 O2 = Molecule("O_2", 5.3562e-26, 213e-12)
 CH4 = Molecule("CH_4", 2.6781e-26, 234e-12)
@@ -68,3 +119,4 @@ fuel = ChemReactions([O2, CH4], [CO, H2], [1, 1], [1, 2], 100, 400)
 print(fuel.reaction_set)
 p1 = Particle(O2, [0, 0], [5, 1])
 print(p1.pos)
+fuel.print()

@@ -38,6 +38,12 @@ class Wall:
         norm /= np.linalg.norm(norm)
         return norm
 
+    def aabb(self):
+        # Return Values for aspect adjusted bounding box.
+
+        return np.array([[max(self.vert[:,0]), max(self.vert[:,1])],
+                         [min(self.vert[:,0]), min(self.vert[:,1])]])
+
 
 class MovingWall(Wall):
 

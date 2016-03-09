@@ -1,4 +1,6 @@
-def valid_reaction(valid_list: list, particles: list):
+import Particle
+
+def valid_reaction(reactions: list, particles: list):
     # Determine if collision, may result in a reaction
 
     # Get reactants
@@ -12,9 +14,9 @@ def valid_reaction(valid_list: list, particles: list):
             return particles
 
     # Determine if reactants form a real reaction
-    for valid in valid_list:
-        if reactants == valid:
-            particles = valid.conditions(particles, valid_list)
+    for reaction in reactions:
+        if reactants == reaction.reaction_set():
+            particles = reaction.activation(particles):
             return particles
 
     # If no reaction is present determine collision
