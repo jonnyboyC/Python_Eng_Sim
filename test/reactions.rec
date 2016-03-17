@@ -1,0 +1,97 @@
+# Reaction 1 Methane decomposition
+1CH4 ->
+1CH3 + 1H
+508
+
+# Reaction 2 Methane Oxidation
+1CH4 + 1O2 ->
+1CH3 + 1H2O
+238
+
+# Reaction 3 Methane something
+1CH4 + 1HO2 ->
+1CH3 + 2OH
+103
+
+# Reaction 4 Methane
+1CH4 + 1OH ->
+1CH3 + 1H2O
+15
+
+# Reaction 5 Oxygen radical reaction
+1O2 + 1H ->
+1O + 1OH
+62
+
+# Reaction 6 Methane
+1CH4 + 1O ->
+1CH3 + 1OH
+38
+
+# Reaction 7 Methyl Radical
+1CH3 + 1O2 ->
+1CH2O + 1OH
+56
+
+# Reaction 8 Formaldehyde
+1CH2O + 1O ->
+1CHO + 1OH
+13
+
+# Reaction 9 Formaldehyde
+1CH2O + 1H ->
+1CHO + 1H2
+20
+
+# Reaction 10 Formaldehyde
+1CH2O + 1OH ->
+1CHO + 1H
+4
+
+# Reaction 11 Formyl radical
+1CHO + 1O ->
+1CO + 1OH
+0
+
+# Reaction 12 Formyl radical
+1CHO + 1H ->
+1CO + 1H2
+0
+
+# Reaction 13 Formyl radical
+1CHO + 1OH ->
+1CO + 1H2O
+0
+
+# Reaction 14 partial water recombination
+1H2 + 1O ->
+1H + 1OH
+50
+
+# Reaction 15 partial water recombination
+1H2 + 1OH ->
+1H + 1H2O
+15
+
+# Reaction 16 Carbon Monoxide oxidation
+1CO + 1OH ->
+1CO2 + 1H
+2
+
+# Reaction 17 Neutralization
+1H + 1OH
+1H2O
+0
+
+# Reaction 18 Hydrogen recombination
+2H ->
+1H2
+0
+
+#Reaction 19
+1H + 1O2 ->
+1HO2
+0
+
+
+

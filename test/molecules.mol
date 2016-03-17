@@ -1,0 +1,98 @@
+# Atomic Oxygen
+O
+2.6569e-26
+1.5200e-10
+249
+False
+
+# Diatomic Oxygen
+O2
+5.3137e-26
+2.5200e-10
+0
+False
+
+# Carbon Monoxide
+CO
+4.6495e-26
+2.4800e-10
+-110.5
+False
+
+# Carbon Dioxide
+CO2
+7.3064e-26
+4.0200e-10
+-393.5
+True
+
+# Atomic Hydrogen
+H
+1.6605e-27
+1.2000e-10
+216
+False
+
+# Diatomic Hydrogen
+H2
+3.3211e-27
+1.3700e-10
+0
+False
+
+# Methyl Radical
+CH3
+2.4908e-26
+2.1600e-10
+1095
+False
+
+#Methane
+CH4
+2.6569e-26
+2.1600e-10
+-74.87
+False
+
+# Formaldehyde
+CH2O
+4.9816e-26
+2.4800e-10
+-108.6
+False
+
+# Hydroxyl Radical
+OH
+2.8229e-26
+1.9000e-10
+38.99
+False
+
+# Water
+H2O
+2.9890e-26
+1.9000e-10
+-241.82
+False
+
+# Formyl radical
+CHO
+4.8156e-26
+2.4800e-10
+824
+False
+
+# Diatomic Nitrogen
+N2
+4.6495e-26
+2.4000e-10
+0
+True
+
+# Hydroperoxyl Radical
+HO2
+5.4798e-26
+3.7800e-10
+14.644
+False
+

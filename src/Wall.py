@@ -35,7 +35,7 @@ class Wall:
         # Calculate wall normal, later determine wall intersection
         norm = self.vert[1, :] - self.vert[0, :]
         norm[1] = -norm[1]
-        norm /= np.linalg.norm(norm)
+        norm = np.multiply(norm, 1/np.linalg.norm(norm))
         return norm
 
     def aabb(self):
@@ -81,13 +81,14 @@ class MovingWall(Wall):
         cen_mass = (self.vert[0, :] + self.vert[1, :])/2
         return cen_mass
 
-
+"""
 derp = np.array([[1, 1], [2, 2]])
-herp = MovingWall(derp, 300, 1, 1, 1, 1, 1, 1, 1, 1)
-merp = Wall(derp, 300, 1, 1, 1, 1, 1)
+herp = MovingWall(derp, 300, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+merp = Wall(derp, 300, 1, 1, 1, 1, 1, 1)
 print(herp.mass)
 herp.temp = 500
 herp.temp_change(1, 1)
 print(herp.temp)
 print(herp.norm)
 print(herp.cen_mass)
+"""
