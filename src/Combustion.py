@@ -2,6 +2,7 @@ import Particle
 import Wall
 import numpy as np
 import re
+import Animate
 
 
 def scan_file(path: str, initial_func, add_func=None, more_input=None):
@@ -101,7 +102,7 @@ def initial_walls(vert, rest_temp, conduct, cp, rho, d, area):
     :return:
     """
 
-    vertices = re.findall("[0-9]*\.[0-9]*", vert)
+    vertices = re.findall("\-?[0-9]*\.[0-9]*", vert)
     for i in range(0, len(vertices)):
         vertices[i] = float(vertices[i])
 
@@ -184,5 +185,21 @@ walls = r"C:\Users\John\PycharmProjects\Python_Eng_Sim\test\walls.wal"
 molecules = scan_file(moles, initial_chemical)
 walls = scan_file(walls, initial_walls)
 reactions = scan_file(react, initial_reaction, add_func=make_mole_map, more_input=molecules)
+
+animation = Animate.Animate()
+animation.show()
+animation.add_walls(walls)
+animation.expand_bounds()
+
+N = 500
+x = np.random.rand(N)
+y = np.random.rand(N)
+m = np.random.random_integers(0, 13, N)
+
+particles = []
+for i in range(0, N):
+    particles.append(Particle.Particle(molecules[m[i]], [x[i]-0.5, y[i]-0.5], [0,0]))
+
+animation.add_particles(particles)
 
 print("you win!")

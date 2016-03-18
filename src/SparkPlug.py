@@ -11,11 +11,20 @@ class SparkPlug:
     def __init__(self, pos, radius: float, temp: float, cycle: int, theta: float):
 
         # Initialize instance variables
-        self.pos = np.array(pos)
+        self.x = np.array(pos)
         self.radius = float(radius)
         self.temp = float(temp)
         self.cycle = int(cycle)
         self.theta = theta
+
+    def aabb(self):
+        """
+        Determine the particles axis aligned bounding box
+        :return: np.array of vertices
+        """
+        radius = self.radius
+        return np.array([self.x[0] + radius, self.x[1] + radius],
+                        [self.x[0] - radius, self.x[1] - radius])
 
 
 pos = [1, 1]

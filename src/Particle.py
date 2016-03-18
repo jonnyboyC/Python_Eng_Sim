@@ -89,7 +89,7 @@ class ChemicalReaction:
                 new_particles[1].pos = np.dot(sum_r, [np.cos(theta), np.sin(theta)])
             if len(new_particles) > 2:
                 for i in range(2, len(new_particles)):
-                    new_particles[i].pos = place(new_particles[0], new_particles[i - 1], new_particles[i].radius)
+                    new_particles[i] = place(new_particles[0], new_particles[i - 1], new_particles[i])
 
             sum_mass = sum(particle.mole.mass for particle in particles)
             sum_pos = np.array([0.0, 0.0])
@@ -129,6 +129,7 @@ class ChemicalReaction:
         output = output[:-3]
         return output
 
+
 class Molecule:
     """
     The Molecule class, contains information on the elemental properties of a given molecule
@@ -159,7 +160,7 @@ class Molecule:
         return self.symbol
 
 
-class Particle(Molecule):
+class Particle:
     """
     The Particle class specifies properties for a given particle, including which molecule
     it represents and its current position and velocity
@@ -206,17 +207,19 @@ class Particle(Molecule):
         return self.symbol + "u = " + np.linalg.norm(self.u)
 
 
-def place(p0: Particle, pi: Particle, rj):
+def place(p0: Particle, pi: Particle, pj: Particle):
     """
     Determines the center of particle of radius rj relative to tangent to particles p0 and pi. The new particle
     occupies the location clockwise relative to the vector defined centers of p0 and pi
+    :rtype: Particle
     :param p0: Particle 0 at the center of the reaction cluster
     :param pi: Particle i surrounding and tangent to Particle 0
     :param rj: radius of Particle j
-    :return: np.array of the coordinates of the new center of Particle j
+    :return: updated Particle j with new position
     """
 
     d = np.linalg.norm(p0.x - pi.x)
+    rj = pj.radius
     r0 = p0.radius + rj
     ri = pi.radius + rj
     x0 = p0.x
@@ -226,10 +229,9 @@ def place(p0: Particle, pi: Particle, rj):
     p = x0 + np.dot(a / d, xi - x0)
 
     # New location
-    x = np.array([0.0, 0.0])
-    x[0] = p[0] + np.dot(h / d, xi[1] - x0[1])
-    x[1] = p[1] + np.dot(h / d, xi[0] - x0[0])
-    return x
+    pj.x[0] = p[0] + np.dot(h / d, xi[1] - x0[1])
+    pj.x[1] = p[1] + np.dot(h / d, xi[0] - x0[0])
+    return pj
 
 """
 O2 = Molecule("O_2", 5.3562e-26, 213e-12, 0, False)
