@@ -30,8 +30,7 @@ class Animate:
 
         circles = PatchCollection(self.p_circle)
         self.sim_ax.add_collection(circles)
-
-
+        pass
 
     def expand_bounds(self):
         limits = self.sim_ax.xaxis.get_data_interval()

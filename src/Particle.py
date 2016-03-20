@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import math
+import Quadtree
 
 
 class ChemicalReaction:
@@ -195,16 +196,15 @@ class Particle:
         Determine the particles axis aligned bounding box
         :return: np.array of vertices
         """
-        radius = self.radius
-        return np.array([self.x[0] + radius, self.x[1] + radius],
-                        [self.x[0] - radius, self.x[1] - radius])
+        radius = self.mole.radius
+        return Quadtree.Rectangle(self.x[0] - radius, self.x[1] - radius, 2*radius, 2*radius)
 
     def __str__(self):
         """
         String representation of the particle
         :return:
         """
-        return self.symbol + "u = " + np.linalg.norm(self.u)
+        return self.mole.symbol + "u = " + np.linalg.norm(self.u)
 
 
 def place(p0: Particle, pi: Particle, pj: Particle):

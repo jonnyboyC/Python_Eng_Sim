@@ -3,6 +3,8 @@ import Wall
 import numpy as np
 import re
 import Animate
+import Quadtree
+import time
 
 
 def scan_file(path: str, initial_func, add_func=None, more_input=None):
@@ -194,12 +196,22 @@ animation.expand_bounds()
 N = 500
 x = np.random.rand(N)
 y = np.random.rand(N)
+u = np.multiply(np.random.rand(N), 10)
+v = np.multiply(np.random.rand(N), 10)
 m = np.random.random_integers(0, 13, N)
 
 particles = []
+quad = Quadtree.Quadtree(0, Quadtree.Rectangle(-0.5, -0.5, 1, 1))
 for i in range(0, N):
-    particles.append(Particle.Particle(molecules[m[i]], [x[i]-0.5, y[i]-0.5], [0,0]))
+    particles.append(Particle.Particle(molecules[m[i]], [x[i]-0.5, y[i]-0.5], [u[i],v[i]]))
 
+start = time.clock()
+for i in range(0, 1000):
+    for particle in particles:
+        quad.insert(particle.aabb())
+    quad.clear()
+end = time.clock()
+print(str((end-start)/1000))
 animation.add_particles(particles)
 
 print("you win!")
