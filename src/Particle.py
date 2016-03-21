@@ -176,8 +176,27 @@ class Particle:
         :return:
         """
         self.mole = molecule
-        self.x = np.array(pos)
+        self.x = pos
         self.u = np.array(vel)
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def aabb(self):
+        return self._aabb
+
+    @x.setter
+    def x(self, x):
+        self._x = np.array(x)
+        self._aabb = Quadtree.Rectangle(
+            x[0] - self.mole.radius,
+            x[1] - self.mole.radius,
+            2*self.mole.radius,
+            2*self.mole.radius
+        )
+
 
     def update_velocity(self, dt):
         """
@@ -191,20 +210,20 @@ class Particle:
         # Currently a stub, not sure if I'll implement this
         pass
 
-    def aabb(self):
-        """
-        Determine the particles axis aligned bounding box
-        :return: np.array of vertices
-        """
-        radius = self.mole.radius
-        return Quadtree.Rectangle(self.x[0] - radius, self.x[1] - radius, 2*radius, 2*radius)
-
     def __str__(self):
         """
         String representation of the particle
         :return:
         """
         return self.mole.symbol + "u = " + np.linalg.norm(self.u)
+
+    @aabb.setter
+    def aabb(self, value):
+        self._aabb = value
+
+    @aabb.setter
+    def aabb(self, value):
+        self._aabb = value
 
 
 def place(p0: Particle, pi: Particle, pj: Particle):
@@ -219,9 +238,9 @@ def place(p0: Particle, pi: Particle, pj: Particle):
     """
 
     d = np.linalg.norm(p0.x - pi.x)
-    rj = pj.radius
-    r0 = p0.radius + rj
-    ri = pi.radius + rj
+    rj = pj.mole.radius
+    r0 = p0.mole.radius + rj
+    ri = pi.mole.radius + rj
     x0 = p0.x
     xi = pi.x
     a = (r0 ** 2 - ri ** 2 + d ** 2) / (2 * d)

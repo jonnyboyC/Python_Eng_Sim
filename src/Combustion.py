@@ -7,6 +7,7 @@ import Quadtree
 import time
 
 
+
 def scan_file(path: str, initial_func, add_func=None, more_input=None):
     """
     Generic function for reading text files to initialize simulation objects
@@ -150,6 +151,8 @@ def reaction(reactions: list, particles: list):
     particles = collision(particles)
     return particles
 
+def stub():
+    pass
 
 def collision(particles: list):
     """
@@ -178,40 +181,60 @@ def collision(particles: list):
 
     return particles
 
+def main():
 
-# path = input("raise your dong: ")
-moles = r"C:\Users\John\PycharmProjects\Python_Eng_Sim\test\molecules.mol"
-react = r"C:\Users\John\PycharmProjects\Python_Eng_Sim\test\reactions.rec"
-walls = r"C:\Users\John\PycharmProjects\Python_Eng_Sim\test\walls.wal"
+    # path = input("raise your dong: ")
+    moles = r"C:\Users\John\PycharmProjects\Python_Eng_Sim\test\molecules.mol"
+    react = r"C:\Users\John\PycharmProjects\Python_Eng_Sim\test\reactions.rec"
+    walls = r"C:\Users\John\PycharmProjects\Python_Eng_Sim\test\walls.wal"
 
-molecules = scan_file(moles, initial_chemical)
-walls = scan_file(walls, initial_walls)
-reactions = scan_file(react, initial_reaction, add_func=make_mole_map, more_input=molecules)
+    molecules = scan_file(moles, initial_chemical)
+    walls = scan_file(walls, initial_walls)
+    reactions = scan_file(react, initial_reaction, add_func=make_mole_map, more_input=molecules)
 
-animation = Animate.Animate()
-animation.show()
-animation.add_walls(walls)
-animation.expand_bounds()
+    animation = Animate.Animate()
+    animation.show()
+    animation.add_walls(walls)
+    animation.expand_bounds()
 
-N = 500
-x = np.random.rand(N)
-y = np.random.rand(N)
-u = np.multiply(np.random.rand(N), 10)
-v = np.multiply(np.random.rand(N), 10)
-m = np.random.random_integers(0, 13, N)
+    N = 10000
+    x = np.random.rand(N)
+    y = np.random.rand(N)
+    u = np.multiply(np.random.rand(N), 10)
+    v = np.multiply(np.random.rand(N), 10)
+    m = np.random.random_integers(0, 13, N)
 
-particles = []
-quad = Quadtree.Quadtree(0, Quadtree.Rectangle(-0.5, -0.5, 1, 1))
-for i in range(0, N):
-    particles.append(Particle.Particle(molecules[m[i]], [x[i]-0.5, y[i]-0.5], [u[i],v[i]]))
+    particles = []
+    quad = Quadtree.Quadtree(0, Quadtree.Rectangle(-0.5, -0.5, 1, 1))
+    for i in range(0, N):
+        particles.append(Particle.Particle(molecules[m[i]], [x[i]-0.5, y[i]-0.5], [u[i],v[i]]))
 
-start = time.clock()
-for i in range(0, 1000):
-    for particle in particles:
-        quad.insert(particle.aabb())
-    quad.clear()
-end = time.clock()
-print(str((end-start)/1000))
-animation.add_particles(particles)
+    #for particle in particles:
+    #    quad.insert(particle.aabb())
 
-print("you win!")
+    start1 = time.clock()
+    stuff = []
+
+    Z = 1
+
+    for i in range(0, Z):
+        for particle in particles:
+            quad.insert(particle)
+        quad.clear()
+    end1 = time.clock()
+
+
+    start2 = time.clock()
+    stuff = []
+
+    for i in range(0, Z):
+        for particle in particles:
+            quad.retreive(stuff, particle)
+        stuff.clear()
+    end2 = time.clock()
+
+    print(str((end1-start1)/Z))
+    print(str((end2-start2)/Z))
+    #animation.add_particles(particles)
+
+    print("you win!")

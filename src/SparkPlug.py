@@ -1,4 +1,5 @@
 import numpy as np
+import Quadtree
 
 
 class SparkPlug:
@@ -16,17 +17,14 @@ class SparkPlug:
         self.temp = float(temp)
         self.cycle = int(cycle)
         self.theta = theta
+        self.aabb = Quadtree.Rectangle(
+            self.x[0] - self.mole.radius,
+            self.x[1] - self.mole.radius,
+            2*self.mole.radius,
+            2*self.mole.radius
+        )
 
-    def aabb(self):
-        """
-        Determine the particles axis aligned bounding box
-        :return: np.array of vertices
-        """
-        radius = self.radius
-        return np.array([self.x[0] + radius, self.x[1] + radius],
-                        [self.x[0] - radius, self.x[1] - radius])
-
-
+"""
 pos = [1, 1]
 radius = 1
 temp = 2000
@@ -35,3 +33,4 @@ theta = 3
 
 derp = SparkPlug(pos, radius, temp, cycle, theta)
 print(derp.cycle)
+"""

@@ -1,4 +1,5 @@
 import numpy as np
+import Quadtree
 
 
 class Wall:
@@ -24,6 +25,13 @@ class Wall:
         self.rho = float(rho)
         self.norm = self.calc_norm()
 
+        self.aabb = Quadtree.Rectangle(
+            min(self.vert[:,0]),
+            min(self.vert[:,1]),
+            max(self.vert[:,0]) - min(self.vert[:,0]),
+            max(self.vert[:,1]) - min(self.vert[:,1]),
+        )
+
     def temp_change(self, q: float, t: float):
 
         # Heat loss rate assuming constant specific heat
@@ -37,12 +45,6 @@ class Wall:
         norm[1] = -norm[1]
         norm = np.multiply(norm, 1/np.linalg.norm(norm))
         return norm
-
-    def aabb(self):
-        # Return Values for aspect adjusted bounding box.
-
-        return np.array([[max(self.vert[:,0]), max(self.vert[:,1])],
-                         [min(self.vert[:,0]), min(self.vert[:,1])]])
 
 
 class MovingWall(Wall):
@@ -80,6 +82,16 @@ class MovingWall(Wall):
 
         cen_mass = (self.vert[0, :] + self.vert[1, :])/2
         return cen_mass
+
+    def aabb(self):
+        # Return Values for aspect adjusted bounding box.
+
+        return Quadtree.Rectangle(
+            min(self.vert[:,0]),
+            min(self.vert[:,1]),
+            max(self.vert[:,0]) - min(self.vert[:,0]),
+            max(self.vert[:,1]) - min(self.vert[:,1]),
+        )
 
 """
 derp = np.array([[1, 1], [2, 2]])

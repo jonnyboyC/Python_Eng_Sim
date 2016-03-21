@@ -1,5 +1,3 @@
-import numpy as np
-
 # Credit to Steven Lambert for the tutorial
 
 class Rectangle:
@@ -13,8 +11,8 @@ class Rectangle:
 
 class Quadtree:
 
-    max_objects = 10
-    max_levels = 5
+    max_objects = 20
+    max_levels = 6
 
     def __init__(self, p_level: int, p_bounds: Rectangle):
         self.level = int(p_level)
@@ -39,20 +37,21 @@ class Quadtree:
         self.nodes[2] = Quadtree(self.level + 1, Rectangle(x, y + subheight, subwidth, subheight))
         self.nodes[3] = Quadtree(self.level + 1, Rectangle(x + subwidth, y + subheight, subwidth, subheight))
 
-    def get_index(self, p_rect: Rectangle):
+    def get_index(self, p_rect):
         index = -1
+        bounds = p_rect.aabb
         v_midpoint = self.bounds.x + self.bounds.width/2
         h_midpoint = self.bounds.y + self.bounds.height/2
 
-        top_quad = p_rect.y < h_midpoint and p_rect.y + p_rect.height < h_midpoint
-        bot_quad = p_rect.y > h_midpoint
+        top_quad = bounds.y < h_midpoint and bounds.y + bounds.height < h_midpoint
+        bot_quad = bounds.y > h_midpoint
 
-        if p_rect.x < v_midpoint and p_rect.x + p_rect.width < v_midpoint:
+        if bounds.x < v_midpoint and bounds.x + bounds.width < v_midpoint:
             if top_quad:
                 index = 1
             elif bot_quad:
                 index = 2
-        elif p_rect.x > v_midpoint:
+        elif bounds.x > v_midpoint:
             if top_quad:
                 index = 0
             elif bot_quad:
@@ -60,7 +59,7 @@ class Quadtree:
 
         return index
 
-    def insert(self, p_rect: Rectangle):
+    def insert(self, p_rect):
         if self.nodes[0] is not None:
             index = self.get_index(p_rect)
 
@@ -83,7 +82,7 @@ class Quadtree:
                 else:
                     i += 1
 
-    def retreive(self, return_obj: list, p_rect: Rectangle):
+    def retreive(self, return_obj: list, p_rect):
         index = self.get_index(p_rect)
         if index != -1 and self.nodes[0] is not None:
             self.nodes[index].retreive(return_obj, p_rect)
