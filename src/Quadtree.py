@@ -2,29 +2,33 @@
 
 class Rectangle:
 
-    def __init__(self, x: float, y: float, width: float, height: float):
+    def __init__(self, x: float, y: float, width: float, height: float, idx=-1):
         self.x = float(x)
         self.y = float(y)
         self.width = float(width)
         self.height = float(height)
+        self.idx = int(idx)
 
 
 class Quadtree:
 
-    max_objects = 20
-    max_levels = 6
+    max_objects = 10
+    max_levels = 7
 
     def __init__(self, p_level: int, p_bounds: Rectangle):
         self.level = int(p_level)
         self.objects = []
         self.bounds = p_bounds
+        self.members = 0
         self.nodes = [None, None, None, None]
 
     def clear(self):
+        self.members = 0
         self.objects.clear()
-        for node in self.nodes:
-            if node is not None:
-                node.clear()
+        for i in range(len(self.nodes)):
+            if self.nodes[i] is not None:
+                self.nodes[i].clear()
+                self.nodes[i] = None
 
     def split(self):
         subwidth = self.bounds.width/2
@@ -37,9 +41,9 @@ class Quadtree:
         self.nodes[2] = Quadtree(self.level + 1, Rectangle(x, y + subheight, subwidth, subheight))
         self.nodes[3] = Quadtree(self.level + 1, Rectangle(x + subwidth, y + subheight, subwidth, subheight))
 
-    def get_index(self, p_rect):
+    def get_index(self, object: object):
         index = -1
-        bounds = p_rect.aabb
+        bounds = object.aabb
         v_midpoint = self.bounds.x + self.bounds.width/2
         h_midpoint = self.bounds.y + self.bounds.height/2
 
@@ -59,16 +63,17 @@ class Quadtree:
 
         return index
 
-    def insert(self, p_rect):
+    def insert(self, object: object):
+        self.members += 1
         if self.nodes[0] is not None:
-            index = self.get_index(p_rect)
+            index = self.get_index(object)
 
             if index != -1:
-                self.nodes[index].insert(p_rect)
+                self.nodes[index].insert(object)
 
                 return
 
-        self.objects.append(p_rect)
+        self.objects.append(object)
 
         if len(self.objects) > Quadtree.max_objects and self.level < Quadtree.max_levels:
             if self.nodes[0] is None:
@@ -82,10 +87,10 @@ class Quadtree:
                 else:
                     i += 1
 
-    def retreive(self, return_obj: list, p_rect):
-        index = self.get_index(p_rect)
+    def retreive(self, return_obj: list, object: object):
+        index = self.get_index(object)
         if index != -1 and self.nodes[0] is not None:
-            self.nodes[index].retreive(return_obj, p_rect)
+            self.nodes[index].retreive(return_obj, object)
 
         return_obj.extend(self.objects)
 

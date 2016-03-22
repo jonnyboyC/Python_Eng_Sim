@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib
-from matplotlib.patches import Circle
+from matplotlib.patches import CirclePolygon
 from matplotlib.collections import PatchCollection
 import numpy as np
 
@@ -25,11 +25,15 @@ class Animate:
 
     def add_particles(self, particles: list):
         for particle in particles:
-            circle = Circle(particle.x, 1e8*particle.mole.radius)
+            circle = CirclePolygon(particle.x, 1e6*particle.mole.radius)
             self.p_circle.append(circle)
 
         circles = PatchCollection(self.p_circle)
+        self.clear_particles()
         self.sim_ax.add_collection(circles)
+        pass
+
+    def clear_particles(self):
         pass
 
     def expand_bounds(self):

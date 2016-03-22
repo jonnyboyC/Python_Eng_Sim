@@ -176,6 +176,7 @@ class Particle:
         :return:
         """
         self.mole = molecule
+        self.aabb = None
         self.x = pos
         self.u = np.array(vel)
 
@@ -183,22 +184,17 @@ class Particle:
     def x(self):
         return self._x
 
-    @property
-    def aabb(self):
-        return self._aabb
-
     @x.setter
     def x(self, x):
         self._x = np.array(x)
-        self._aabb = Quadtree.Rectangle(
+        self.aabb = Quadtree.Rectangle(
             x[0] - self.mole.radius,
             x[1] - self.mole.radius,
             2*self.mole.radius,
             2*self.mole.radius
         )
 
-
-    def update_velocity(self, dt):
+    def update_x(self, dt):
         """
         Update the particles position based on time step and velocity
         :param dt: time step
@@ -217,13 +213,6 @@ class Particle:
         """
         return self.mole.symbol + "u = " + np.linalg.norm(self.u)
 
-    @aabb.setter
-    def aabb(self, value):
-        self._aabb = value
-
-    @aabb.setter
-    def aabb(self, value):
-        self._aabb = value
 
 
 def place(p0: Particle, pi: Particle, pj: Particle):
