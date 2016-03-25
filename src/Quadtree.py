@@ -7,7 +7,6 @@ class Rectangle:
         self.y = float(y)
         self.width = float(width)
         self.height = float(height)
-        self.idx = int(idx)
 
 
 class Quadtree:
@@ -21,6 +20,8 @@ class Quadtree:
         self.bounds = p_bounds
         self.members = 0
         self.nodes = [None, None, None, None]
+        self.v_midpoint = self.bounds.x + self.bounds.width/2
+        self.h_midpoint = self.bounds.y + self.bounds.height/2
 
     def clear(self):
         self.members = 0
@@ -42,26 +43,25 @@ class Quadtree:
         self.nodes[3] = Quadtree(self.level + 1, Rectangle(x + subwidth, y + subheight, subwidth, subheight))
 
     def get_index(self, object: object):
-        index = -1
+        """
+        TODO: Optimize
+
+        """
         bounds = object.aabb
-        v_midpoint = self.bounds.x + self.bounds.width/2
-        h_midpoint = self.bounds.y + self.bounds.height/2
 
-        top_quad = bounds.y < h_midpoint and bounds.y + bounds.height < h_midpoint
-        bot_quad = bounds.y > h_midpoint
+        if bounds.x > self.v_midpoint:
+            if bounds.y > self.h_midpoint:
+                return 3
+            elif bounds.y + bounds.height < self.h_midpoint:
+                return 0
 
-        if bounds.x < v_midpoint and bounds.x + bounds.width < v_midpoint:
-            if top_quad:
-                index = 1
-            elif bot_quad:
-                index = 2
-        elif bounds.x > v_midpoint:
-            if top_quad:
-                index = 0
-            elif bot_quad:
-                index = 3
+        elif bounds.x + bounds.width < self.v_midpoint:
+            if bounds.y > self.h_midpoint:
+                return 2
+            elif bounds.y + bounds.height < self.h_midpoint:
+                return 3
 
-        return index
+        return -1
 
     def insert(self, object: object):
         self.members += 1
@@ -86,6 +86,19 @@ class Quadtree:
                     self.nodes[index].insert(self.objects.pop(i))
                 else:
                     i += 1
+
+    def set_leaf(self):
+        if self.nodes[0] is not None:
+            self.nodes[0].set_leaf()
+            self.nodes[1].set_leaf()
+            self.nodes[2].set_leaf()
+            self.nodes[3].set_leaf()
+            return
+
+        for obj in self.objects:
+            obj.leaf = True
+
+        return
 
     def retreive(self, return_obj: list, object: object):
         index = self.get_index(object)

@@ -17,7 +17,10 @@ class Wall:
         # Initialize instance variables
         self.unit = None
         self.norm = None
+        self.length = 0
         self.vert = vert
+        self.checked = False
+        self.leaf = False
         self.rest_temp = float(rest_temp)
         self.temp = float(rest_temp)
         self.conduct = float(conduct)
@@ -42,12 +45,16 @@ class Wall:
         self._vert = np.array(vertices)
         self.unit = self.calc_unit()
         self.norm = self.calc_norm()
+        self.length = self.calc_length()
 
     def temp_change(self, q: float, t: float):
 
         # Heat loss rate assuming constant specific heat
         dt_heat = -self.conduct*self.area*(self.temp-self.rest_temp)/self.d + q
         self.temp += dt_heat*t/self.cp
+
+    def calc_length(self):
+        return np.abs(np.linalg.norm([self._vert[1, :] - self._vert[0, :]]))
 
     def calc_unit(self):
         unit = self._vert[1, :] - self._vert[0, :]
@@ -59,7 +66,7 @@ class Wall:
         # Calculate wall normal, later determine wall intersection
         norm = self.unit
         norm = [norm[1], norm[0]]
-        norm[1] *= -1
+        norm[0] *= -1
         return norm
 
 

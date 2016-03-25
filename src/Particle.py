@@ -179,6 +179,8 @@ class Particle:
         self.aabb = None
         self.x = pos
         self.u = np.array(vel)
+        self.checked = False
+        self.leaf = False
 
     @property
     def x(self):

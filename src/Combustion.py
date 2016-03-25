@@ -1,10 +1,12 @@
-import Particle
-import Wall
+from Particle import Particle, Molecule, ChemicalReaction
+from Wall import Wall
 import numpy as np
+from scipy.spatial.distance import pdist, squareform
 import re
-import Animate
-import Quadtree
+import Animate 
+from  Quadtree import Quadtree, Rectangle
 import time
+import matplotlib
 
 
 
@@ -63,7 +65,6 @@ def make_mole_map(molecules: list):
 
     return mole_map
 
-
 def initial_reaction(reactants, products, ea, additional):
     """
 
@@ -89,7 +90,7 @@ def initial_reaction(reactants, products, ea, additional):
     reactants[:] = [additional[a[1:]] for a in reactants]
     products[:] = [additional[a[1:]] for a in products]
 
-    return Particle.ChemicalReaction(reactants, products, nu_r, nu_p, ea)
+    return ChemicalReaction(reactants, products, nu_r, nu_p, ea)
 
 
 def initial_walls(vert, rest_temp, conduct, cp, rho, d, area):
@@ -110,7 +111,7 @@ def initial_walls(vert, rest_temp, conduct, cp, rho, d, area):
         vertices[i] = float(vertices[i])
 
     coordinates = [vertices[0:2], vertices[2:4]]
-    return Wall.Wall(coordinates, rest_temp, conduct, cp, rho, d, area)
+    return Wall(coordinates, rest_temp, conduct, cp, rho, d, area)
 
 
 def initial_chemical(symbol, mass, radius, enthalpy, inert):
@@ -124,7 +125,7 @@ def initial_chemical(symbol, mass, radius, enthalpy, inert):
     :return:
     """
 
-    return Particle.Molecule(symbol, mass, radius, enthalpy, inert == 'True')
+    return Molecule(symbol, mass, radius, enthalpy, inert == 'True')
 
 
 def reaction(reactions: list, particles: list):
@@ -151,54 +152,124 @@ def reaction(reactions: list, particles: list):
     particles = collision(particles)
     return particles
 
-def stub():
-    pass
 
-def collision(object0, object1):
+def step_time(i: int, particles: list, objects: list, quad: Quadtree, dt: float): 
+    #start1 = time.clock()
+    for object in objects:
+            quad.insert(object)
+            
+    quad.set_leaf()
+    #stop1 = time.clock()
+  
+    #start2 = time.clock()
+    collision(particles, quad)
+
+    for object in objects:
+        object.checked = False
+        object.leaf = False
+    #stop2 = time.clock()
+
+    #start3 = time.clock()
+    for particle in particles:
+        particle.update_x(dt)
+    #stop3 = time.clock()
+
+    #start4 = time.clock()
+    quad.clear()
+    #stop4 = time.clock()
+
+    #print('Loop: ' + str(i) + ' insert: ' + str(stop1 - start1) + ' collision: ' + str(stop2 - start2) + ' update: ' + str(stop3 - start3) + ' clear: ' + str(stop4 - start4))
+
+def collision(particles: list, quad: Quadtree):
     """
-    Determines the resulting velocity after to particles elastically collide
-    :param particles: list of particles
-    :return: updated particles
+    Determine if particles collide and update velocities according to colission type
+    :param particles: list of particles in the simulation
+    :param quad: Quadtree containing particles
     """
+    for particle in particles:
+        if particle.checked:
+            continue
 
-    if isinstance(object0, Wall.Wall) and isinstance(object1, Wall.Wall):
-        return
+        neighbors = []
 
-    if isinstance(object0, Wall.Wall):
-        inelastic_wall(wall=object0, particle=object1)
+        # Retrieve objects that may intersect this particle
+        neighbors = quad.retreive(neighbors, particle)
 
-    elif isinstance(object1, Wall.Wall):
-        inelastic_wall(wall=object1, particle=object0)
+        # separate particles from walls
+        p_neighbors = [neighbor for neighbor in neighbors 
+                        if isinstance(neighbor, Particle) 
+                        and neighbor.checked is False]
+        w_neighbors = [neighbor for neighbor in neighbors
+                        if isinstance(neighbor, Wall)]
 
-    else:
-        inelastic_particles(object0, object1) 
+        # Determine which objects at a given level of the quadtree itersect
+        positions = np.array([neighbor.x for neighbor in p_neighbors])
+        distances = squareform(pdist(positions))
+        radius_sums = radius_sum(p_neighbors)
+
+        idx1, idx2 = np.where(distances - radius_sums < 0)
+        unique = (idx1 < idx2)
+
+        idx1 = idx1[unique]
+        idx2 = idx2[unique]
+
+        # If two particles are shown to collide update particles
+        for id1, id2 in zip(idx1, idx2):
+            inelastic_particles(particles[id1], particles[id2])
+            particles[id1].checked = True
+            particles[id2].checked = True
+
+        # Check particles from this retreive to walls retreived
+        for wall in w_neighbors:
+            for particle in p_neighbors:
+                if inelastic_wall(wall, particle):
+                    particle.checked = True
+
+        # If particle is a leaf node it has been checked againsted all canidates
+        for neighbor in p_neighbors:
+            if neighbor.leaf:
+                neighbor.checked = True
 
 
-def inelastic_wall(wall: Wall.Wall, particle: Particle.Particle):
+def inelastic_wall(wall: Wall, particle: Particle):
     """
-    return (Math.abs((l2.lat() - l1.lat())*c.lat() +  c.lng()*(l1.lng() -     
-       l2.lng()) + (l1.lat() - l2.lat())*l1.lng() +
-       (l1.lng() - l2.lng())*c.lat())/ Math.sqrt((l2.lat() - l1.lat())^2 +
-       (l1.lng() - l2.lng())^2) <= r)
+    TODO extending for moveable walls
+    Determines the resulting velocity of a particle bouncing off a wall
+    :param wall: the wall object that may intersect the particle
+    :param particle: the particle in the vicinity of the wall
+    :return: Boolean value of true if a collision occured
     """
     x0 = particle.x
+    u0 = particle.u
     x1 = wall.vert[:, 1]
+    p = x0 - x1
     unit = wall.unit
+    norm = wall.norm
 
-    proj_vec = (x1 - x0) - np.multiply(np.dot((x1 - x0), unit),unit)
-    dis = np.linalg.norm(proj_vec) 
+    dis = np.abs(np.dot(p, norm))
 
     if dis > particle.mole.radius:
+        return False
+
+    norm_dir = np.dot(u0, norm)
+    if norm_dir > 0:
         return
 
-    dir_mag = np.dot(u0, proj_vec)/np.power(dis, 2)
-    particle.u -= np.multiply(dir_mag, proj_vec)
+    nu = np.multiply(norm_dir, norm)
+    uu = np.multiply(np.dot(u0, unit), unit)
+    particle.u = uu - nu
+
+    return True
     
 
-def inelastic_particles(particle0: Particle.Particle, particle1: Particle.Particle):
-    if (np.linalg.norm(particle0.x - particle1.x) > 
-        particle0.mole.radius + particle1.mole.radius):
-        return
+def inelastic_particles(particle0: Particle, particle1: Particle):
+    """
+    TODO extending for moveable walls
+    Determines the resulting velocity of a particle bouncing off a wall
+    :param wall: the wall object that may intersect the particle
+    :param particle: the particle in the vicinity of the wall
+    :return: Boolean value of true if a collision occured
+    """
 
     # Determine mass ratios
     mass_ratio0 = 2 * particle1.mole.mass / (particle0.mole.mass + particle1.mole.mass)
@@ -215,8 +286,46 @@ def inelastic_particles(particle0: Particle.Particle, particle1: Particle.Partic
     dir_vec = (x0 - x1)
 
     # Set new velocities
-    particle0.vel = mass_ratio0 * dir_mag * dir_vec
-    particle1.vel = mass_ratio1 * dir_mag * -dir_vec
+    particle0.u += mass_ratio0 * dir_mag * dir_vec
+    particle1.u += mass_ratio1 * dir_mag * -dir_vec
+
+
+def radius_sum(particles: list):
+    """
+    Determines each pairwise sum of elements in particles for intersection
+    :param particles: the particle currently being checked
+    :return np.array: size [len(particles), len(particles)] of pairwise sums
+    """
+    radius = np.array([particle.mole.radius for particle in particles])
+    sums = radius[:, None] + radius[None, :]
+
+    return sums
+
+
+def random_start(N: int, u: float, x: float, molecules: list):
+    """
+
+    :param N:
+    :param u:
+    :param x:
+    :param molecules:
+    :return:
+    """
+
+    x0 = np.multiply(np.random.rand(N), 2*x)
+    x1 = np.multiply(np.random.rand(N), 2*x)
+    u0 = np.multiply(np.random.rand(N), 2*u)
+    u1 = np.multiply(np.random.rand(N), 2*u)
+    m = np.random.random_integers(0, 13, N)
+
+    particles = []
+    for i in range(0, N):
+        particles.append(Particle(molecules[m[i]], [x0[i] - x, x1[i] - x], [u0[i] - u ,u1[i] - u]))
+
+    quad = Quadtree(0, Rectangle(-1.2*x, 1.2*x, 2.4*x, 2.4*x))
+
+    return particles, quad
+
 
 def main():
 
@@ -228,59 +337,22 @@ def main():
     walls = scan_file(walls, initial_walls)
     reactions = scan_file(react, initial_reaction, add_func=make_mole_map, more_input=molecules)
 
-    
-    animation = Animate.Animate()
-    animation.add_walls(walls)
-    animation.expand_bounds()
-    animation.show()
+    particles, quad = random_start(1000, 10,  5e-7, molecules)
+    # fig = Animate.make_fig()
 
-    N = 100
-    x = np.multiply(np.random.rand(N), 0.1)
-    y = np.multiply(np.random.rand(N), 0.1)
-    u = np.multiply(np.random.rand(N), 20)
-    v = np.multiply(np.random.rand(N), 20)
-    m = np.random.random_integers(0, 13, N)
+    # ani = matplotlib.animation.FuncAnimation(fig, Animate.animate, np.arange(0, 200), 
 
-    particles = []
-    quad = Quadtree.Quadtree(0, Quadtree.Rectangle(-0.06, -0.06, 0.12, 0.12))
-    for i in range(0, N):
-        particles.append(Particle.Particle(molecules[m[i]], [x[i]-0.05, y[i]-0.05], [u[i]-10,v[i]-10]))
-
-    neighbors = []
     objects = []
     objects.extend(particles)
     objects.extend(walls)
-    dt = 0.0001
+    dt = 1e-10
 
     for i in range(1000):
-        start1 = time.clock()
-        for object in objects:
-            quad.insert(object)
-        stop1 = time.clock()
-
-        start2 = time.clock()
-        for object in objects:
-            neighbors = quad.retreive(neighbors, object)
-            for neighbor in neighbors:
-                if object is neighbor:
-                    continue
-                collision(object, neighbor)
-            neighbors = []
-        stop2 = time.clock()
-
-        animation.add_particles(particles)
-
-        start3 = time.clock()
-        for particle in particles:
-            particle.update_x(i*dt)
-        stop3 = time.clock()
-
-        start4 = time.clock()
-        quad.clear()
-        stop4 = time.clock()
-
-        print('Loop: ' + str(i) + ' insert: ' + str(stop1 - start1) + ' collision: ' + str(stop2 - start2) + ' update: ' + str(stop3 - start3) + ' clear: ' + str(stop4 - start4))
-
+        step_time(i, particles, objects, quad, dt)
+    
+    # matplotlib.animation.FuncAnimation(
     print("you win!")
 
-main()
+
+if __name__ == '__main__':
+    main()
