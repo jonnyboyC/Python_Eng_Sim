@@ -23,14 +23,3 @@ class SparkPlug:
             2*self.mole.radius,
             2*self.mole.radius
         )
-
-"""
-pos = [1, 1]
-radius = 1
-temp = 2000
-cycle = 4
-theta = 3
-
-derp = SparkPlug(pos, radius, temp, cycle, theta)
-print(derp.cycle)
-"""

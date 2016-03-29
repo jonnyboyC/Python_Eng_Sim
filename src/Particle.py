@@ -1,10 +1,10 @@
 import numpy as np
 import random
 import math
-import Quadtree
+from Quadtree import Rectangle
 
 
-class ChemicalReaction:
+class ChemicalReaction(object):
     """
     The chemical reactions class outlines the required reactants, products, activation energy, and chemical
     energy released or absorbed during the reaction
@@ -131,7 +131,7 @@ class ChemicalReaction:
         return output
 
 
-class Molecule:
+class Molecule(object):
     """
     The Molecule class, contains information on the elemental properties of a given molecule
     """
@@ -161,11 +161,12 @@ class Molecule:
         return self.symbol
 
 
-class Particle:
+class Particle(object):
     """
     The Particle class specifies properties for a given particle, including which molecule
     it represents and its current position and velocity
     """
+    g = np.array([0, -9.81])
 
     def __init__(self, molecule: Molecule, pos: list, vel: list):
         """
@@ -176,7 +177,7 @@ class Particle:
         :return:
         """
         self.mole = molecule
-        self.aabb = None
+        self.aabb = Rectangle(0, 0, 2*self.mole.radius, 2*self.mole.radius)
         self.x = pos
         self.u = np.array(vel)
         self.checked = False
@@ -188,13 +189,14 @@ class Particle:
 
     @x.setter
     def x(self, x):
+        """
+        Always update the bounding box when updating position
+        :param x: update the internal _x and bounding box
+        """
         self._x = np.array(x)
-        self.aabb = Quadtree.Rectangle(
-            x[0] - self.mole.radius,
-            x[1] - self.mole.radius,
-            2*self.mole.radius,
-            2*self.mole.radius
-        )
+        self.aabb.x = x[0] - self.mole.radius,
+        self.aabb.y = x[1] - self.mole.radius,
+
 
     def update_x(self, dt):
         """
@@ -202,10 +204,12 @@ class Particle:
         :param dt: time step
         :return: None
         """
-        self.x += dt * self.u
+        self.x += dt * self.u + 0.5 * Particle.g * dt ** 2
 
     def radiate_heat(self, dt):
-        # Currently a stub, not sure if I'll implement this
+        """
+        Currently a stub
+        """
         pass
 
     def __str__(self):
@@ -213,7 +217,7 @@ class Particle:
         String representation of the particle
         :return:
         """
-        return self.mole.symbol + "u = " + np.linalg.norm(self.u)
+        return self.mole.symbol + " u mag = " + str(np.linalg.norm(self.u))
 
 
 
@@ -242,18 +246,3 @@ def place(p0: Particle, pi: Particle, pj: Particle):
     pj.x[0] = p[0] + np.dot(h / d, xi[1] - x0[1])
     pj.x[1] = p[1] + np.dot(h / d, xi[0] - x0[0])
     return pj
-
-"""
-O2 = Molecule("O_2", 5.3562e-26, 213e-12, 0, False)
-CH4 = Molecule("CH_4", 2.6781e-26, 234e-12, -74.87, False)
-CO = Molecule("CO", 4.6867e-26, 262e-12, -110.5, False)
-H2 = Molecule("H_2", 3.3476e-27, 157e-12, 0, False)
-
-fuel = ChemicalReaction([O2, CH4], [CO, H2], [1, 1], [1, 2], 1e-25)
-print(fuel.reaction_set)
-p1 = Particle(O2, [0, 0], [5, 1])
-p2 = Particle(CO, [0, 0], [400, 1])
-out = fuel.activation([p1, p2])
-print(p1.x)
-fuel.print()
-"""
